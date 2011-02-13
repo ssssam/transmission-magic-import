@@ -1,0 +1,17 @@
+# Location to find the input .torrent files
+#input_path = '/home/me/torrents-in'
+
+# Where to search for downloaded data
+#search_paths = ['/media/Music', '/media/Music 2']
+
+# Torrents with the tracker hostnames listed here will not be added. (Might not
+# work for torrents with more than one tracker)
+#exclude_trackers = ['tracker.site-that-has-shut-down.org']
+
+# Data in these paths will be avoided if the data can also be found in another location.
+#avoid_data_paths = ['/media/Music/torrents-incomplete']
+
+# How to connect to Transmission. Make sure 'web client' is enabled in
+# the preferences.
+transmission_hostname = '127.0.0.1'
+transmission_port = 9091
