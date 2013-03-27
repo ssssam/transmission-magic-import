@@ -70,7 +70,6 @@ class Config:
 			                        "please edit the file.")
 
 		# copy known config keys to attributes on the instance
-		for name in config.keys():
-			setattr(self, name, config[name])
-
+		for name in _keys:
+			setattr(self, name, config.get(name, []))
 
