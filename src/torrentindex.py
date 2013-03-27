@@ -20,6 +20,7 @@
 import glob
 import os
 import pickle
+import sys
 import urlparse
 
 import bdecode
@@ -118,6 +119,11 @@ class Torrent:
 
 class TorrentIndex:
 	def __init__ (self, config, store_ignored = False):
+		self.config = config
+		self.store_ignored = store_ignored
+		self.excluded = 0
+		self.duplicates = 0
+
 		# List of torrent objects
 		self.torrents = []
 
@@ -135,74 +141,26 @@ class TorrentIndex:
 			self.duplicate_torrent_files = []
 			self.excluded_torrent_files = []
 
-		torrent_filenames = glob.glob (os.path.join (config.input_path, '*.torrent'))
+		print "Reading torrent files ..."
 
-		if len(torrent_filenames) == 0:
+		# Iterate through every .torrent file below 'config.input_path'
+		def walk_fn(arg, dirname, filenames):
+			for f in filenames:
+				if f.endswith('.torrent'):
+					self.read_torrent(os.path.join(dirname, f))
+		os.path.walk (config.input_path, walk_fn, None)
+
+		print ".. done, found %i torrents" % len(self.torrents),
+
+		if len(self.torrents) == 0:
 			sys.stderr.write ("transmission-magic-import: no files found in path '%s'\n"
 			                  % config.input_path)
 			sys.exit(1)
 
-		print "Reading torrent files ..."
-
-		excluded = 0
-		duplicates = 0
-
-		for filename in torrent_filenames:
-			torrent_file = open (filename, 'r')
-
-			# FIXME: This is a pretty slow operation; we don't need to decode all the data yet
-			torrent_data = bdecode.bdecode (torrent_file.read())
-
-			# Get tracker hostname, see if this torrent should be ignored
-			#
-			tracker_url = urlparse.urlparse (torrent_data['announce'])
-			tracker_hostname = tracker_url.hostname
-
-			# Store tracker even if it's excluded; this list is only used for 'info'
-			if tracker_hostname not in self.trackers:
-				self.trackers.append (tracker_hostname)
-
-			if tracker_hostname in config.exclude_trackers:
-				if store_ignored: self.excluded_torrent_files.append (filename)
-				excluded = excluded + 1
-				torrent_file.close()
-				continue
-
-			type = 'single'
-			if 'files' in torrent_data['info']:
-				type = 'multi'
-
-			name = torrent_data['info']['name']
-			name_index = getattr (self, "names_" + type)
-
-			# Check for duplicates
-			is_duplicate = False
-			if name in name_index:
-				for existing_torrent in name_index[name]:
-					if torrent_info_matches (existing_torrent.file_info, torrent_data['info']):
-						is_duplicate = True
-						duplicates += 1
-						break
-			if is_duplicate:
-				if store_ignored: self.duplicate_torrent_files.append (filename)
-				torrent_file.close()
-				continue
-
-			torrent = Torrent (filename, name, type, torrent_data['info'])
-			self.torrents.append (torrent)
-
-			if name in name_index:
-				name_index[name].append (torrent)
-			else:
-				name_index[name] = [torrent]
-
-			torrent_file.close()
-
-		print " .. done; found %i torrents" % len(self.torrents),
-		if duplicates:
-			print "with %i duplicates" % duplicates,
-		if excluded:
-			print "and %i excluded by tracker" % excluded,
+		if self.duplicates:
+			print "with %i duplicates" % self.duplicates,
+		if self.excluded:
+			print "and %i excluded by tracker" % self.excluded,
 		print "\n"
 
 		# Free piece data, we don't need it now the duplicates are gone, and it
@@ -210,7 +168,57 @@ class TorrentIndex:
 		for torrent in self.torrents:
 			torrent.file_info['pieces'] = None
 
+	def read_torrent (self, filename):
+		torrent_file = open (filename, 'r')
 
+		# FIXME: This is a pretty slow operation; we don't need to decode all the data yet
+		torrent_data = bdecode.bdecode (torrent_file.read())
+
+		# Get tracker hostname, see if this torrent should be ignored
+		#
+		tracker_url = urlparse.urlparse (torrent_data['announce'])
+		tracker_hostname = tracker_url.hostname
+
+		# Store tracker even if it's excluded; this list is only used for 'info'
+		if tracker_hostname not in self.trackers:
+			self.trackers.append (tracker_hostname)
+
+		if tracker_hostname in self.config.exclude_trackers:
+			if store_ignored: self.excluded_torrent_files.append (filename)
+			self.excluded += 1
+			torrent_file.close()
+			return
+
+		type = 'single'
+		if 'files' in torrent_data['info']:
+			type = 'multi'
+
+		name = torrent_data['info']['name']
+		name_index = getattr (self, "names_" + type)
+
+		# Check for duplicates
+		is_duplicate = False
+		if name in name_index:
+			for existing_torrent in name_index[name]:
+				if torrent_info_matches (existing_torrent.file_info, torrent_data['info']):
+					is_duplicate = True
+					self.duplicates += 1
+					break
+		if is_duplicate:
+			if self.store_ignored:
+				self.duplicate_torrent_files.append (filename)
+			torrent_file.close()
+			return
+
+		torrent = Torrent (filename, name, type, torrent_data['info'])
+		self.torrents.append (torrent)
+
+		if name in name_index:
+			name_index[name].append (torrent)
+		else:
+			name_index[name] = [torrent]
+
+		torrent_file.close()
 
 	def purge_stage1 (self):
 		"""Remove data not needed for 'import' command to save space in .results file"""
