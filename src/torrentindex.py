@@ -227,6 +227,6 @@ class TorrentIndex:
 
 	def save (self):
 		results_file = open('transmission-magic-import.results', 'w')
-		pickle.dump (self, results_file)
+		pickle.dump (self.torrents, results_file)
 		results_file.close ()
 		print "\nWrote ./transmission-magic-import.results\n"

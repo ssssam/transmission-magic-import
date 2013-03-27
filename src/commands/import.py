@@ -31,7 +31,7 @@ class cmd_import (commands.Command):
 	name = 'import'
 
 	def run(self, config, help=None):
-		index = load_index()
+		torrents = load_index()
 
 		try:
 			tc = transmissionrpc.Client(config.transmission_hostname, port=config.transmission_port)
@@ -48,7 +48,7 @@ class cmd_import (commands.Command):
 		newly_queued = 0
 		already_present = 0
 
-		for torrent in index.torrents:
+		for torrent in torrents:
 			data_path = torrent.choose_data_path()
 			if data_path == None: continue
 
