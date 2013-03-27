@@ -69,7 +69,7 @@ def main(args):
 		sys.stderr.write('\ntransmission-magic-import %s: %s\n' % (command, exc))
 		sys.exit(1)
 	except KeyboardInterrupt:
-		uprint('Interrupted')
+		sys.stderr.write('Interrupted')
 		sys.exit(1)
 
 	if rc:
