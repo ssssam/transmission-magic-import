@@ -36,7 +36,7 @@ class cmd_import (commands.Command):
 
 		try:
 			tc = transmissionrpc.Client(config.transmission_hostname, port=config.transmission_port)
-		except transmissionrpc.transmission.TransmissionError, e:
+		except transmissionrpc.error.TransmissionError, e:
 			raise errors.FatalError ("Unable to connect to a Transmission at %s:%i. %s.\n\n"
 			                         "Make sure Transmission is running, the web client is "
 			                         "enabled in the preferences and its details match the "
