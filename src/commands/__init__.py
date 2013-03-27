@@ -66,8 +66,11 @@ def run(command, config, help=None):
 	if command not in _commands:
 		try:
 			__import__('commands.%s' % command)
-		except ImportError:
-			pass
+		except ImportError as e:
+			if e.message.endswith(command):
+				pass
+			else:
+				raise e
 	if command not in _commands:
 		raise errors.FatalError('command not found')
 
