@@ -32,15 +32,15 @@ class cmd_clean_torrents(commands.Command):
         if len(index.duplicate_torrent_files) > 0:
             for file in index.duplicate_torrent_files:
                 os.remove(file)
-            print "\nclean-torrents: Removed %i duplicate .torrent files" % \
-                  len(index.duplicate_torrent_files)
+            print("\nclean-torrents: Removed %i duplicate .torrent files" % \
+                  len(index.duplicate_torrent_files))
 
         if len(index.excluded_torrent_files) > 0:
             for file in index.excluded_torrent_files:
                 os.remove(file)
-            print "\nclean-torrents: Removed %i excluded torrents" % \
-                  len(index.excluded_torrent_files)
+            print("\nclean-torrents: Removed %i excluded torrents" % \
+                  len(index.excluded_torrent_files))
 
         if len(index.duplicate_torrent_files) == 0 and len(index.excluded_torrent_files) == 0:
-            print "\nclean-torrents: Nothing to remove."
+            print("\nclean-torrents: Nothing to remove.")
 commands.register_command(cmd_clean_torrents)

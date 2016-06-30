@@ -21,7 +21,7 @@ import transmissionrpc;
 
 import glob;
 import os;
-import urllib;
+import urllib.request, urllib.parse, urllib.error;
 
 import transmissionmagicimport.commands as commands
 import transmissionmagicimport.errors as errors
@@ -38,7 +38,7 @@ class cmd_import (commands.Command):
         try:
             tc = transmissionrpc.Client(
                 config.transmission_hostname, port=config.transmission_port)
-        except transmissionrpc.error.TransmissionError, e:
+        except transmissionrpc.error.TransmissionError as e:
             raise errors.FatalError("Unable to connect to a Transmission at %s:%i. %s.\n\n"
                                      "Make sure Transmission is running, the web client is "
                                      "enabled in the preferences and its details match the "
@@ -46,7 +46,7 @@ class cmd_import (commands.Command):
                                      "not running if you are trying to connect to a GUI instance."
                                      % (config.transmission_hostname, config.transmission_port, e))
 
-        tc_existing_torrents = tc.list()
+        tc_existing_torrents = tc.get_torrents()
 
         newly_queued = 0
         already_present = 0
@@ -60,20 +60,17 @@ class cmd_import (commands.Command):
                 continue
 
             try:
-                tc_list = tc.add_torrent(
-                        torrent.filename, download_dir=data_path, paused=True)
+                torrent = tc.add_torrent(torrent.filename,
+                        download_dir=data_path, paused=True)
             except transmissionrpc.error.TransmissionError as e:
                 raise
 
-            for key, value in tc_list.iteritems():
-                tc_torrent_id=key
-                tc_torrent=value
-            tc.verify(tc_torrent_id)
+            tc.verify_torrent(torrent.id)
 
-            tc_existing_torrents.update(tc_list)
+            tc_existing_torrents.append(torrent)
 
             newly_queued += 1
 
-        print "\nAdded to queue: %i (already present: %i)" % (newly_queued, already_present)
+        print("\nAdded to queue: %i (already present: %i)" % (newly_queued, already_present))
 
 commands.register_command(cmd_import)

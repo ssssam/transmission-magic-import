@@ -49,7 +49,7 @@ Other commands:
 
 
 def print_help():
-    print help
+    print(help)
 
 
 def main(args):
@@ -61,13 +61,13 @@ def main(args):
 
     try:
         config = Config()
-    except errors.FatalError, exc:
+    except errors.FatalError as exc:
         sys.stderr.write("transmission-magic-import: %s\n" % exc.args[0])
         sys.exit(1)
 
     try:
         rc = commands.run(command, config, help=print_help)
-    except errors.FatalError, exc:
+    except errors.FatalError as exc:
         sys.stderr.write('\ntransmission-magic-import %s: %s\n' %
                          (command, exc))
         sys.exit(1)

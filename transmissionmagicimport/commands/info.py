@@ -29,14 +29,14 @@ class cmd_info(commands.Command):
     def run(self, config, help=None):
         index = TorrentIndex(config)
 
-        print "Multi-file torrents: %i, single-file torrents %i\n" % \
-            (len(index.names_multi), len(index.names_single))
+        print("Multi-file torrents: %i, single-file torrents %i\n" % \
+            (len(index.names_multi), len(index.names_single)))
 
-        print "Trackers: %i" % len(index.trackers)
+        print("Trackers: %i" % len(index.trackers))
         for hostname in index.trackers:
-            print "\t%s" % hostname,
+            print("\t%s" % hostname, end=' ')
             if hostname in config.exclude_trackers:
-                print " (excluded)",
-            print
+                print(" (excluded)", end=' ')
+            print()
 
 commands.register_command(cmd_info)

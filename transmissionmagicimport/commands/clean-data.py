@@ -37,7 +37,7 @@ class cmd_clean_data (commands.Command):
         try:
             tc = transmissionrpc.Client(
                 config.transmission_hostname, port=config.transmission_port)
-        except transmissionrpc.transmission.TransmissionError, e:
+        except transmissionrpc.transmission.TransmissionError as e:
             raise errors.FatalError("Unable to connect to a Transmission at %s:%i. %s.\n\n"
                                     "Make sure Transmission is running, the web client is "
                                     "enabled in the preferences and its details match the "
@@ -64,7 +64,7 @@ class cmd_clean_data (commands.Command):
                 path = os.path.join(
                     spare_data[0], utils.normalise_path(torrent.name))
                 #path =  path.replace("(","\\(").replace(")","\\)").replace(" ","\\ ")
-                print "%s" % path
+                print("%s" % path)
 
                 # Here's the version of the data that's actually being used
                 # os.path.join (torrent.data_matches[0][0],

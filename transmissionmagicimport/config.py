@@ -48,15 +48,15 @@ class Config:
     def load(self):
         config = self._config
         try:
-            execfile(self.filename, config)
-        except Exception, e:
+            exec(compile(open(self.filename).read(), self.filename, 'exec'), config)
+        except Exception as e:
             if isinstance(e, errors.FatalError):
                 raise e
             traceback.print_exc()
             raise errors.FatalError('could not load config file')
 
         unknown_keys = []
-        for k in config.keys():
+        for k in list(config.keys()):
             if k in _keys:
                 continue
             if k[0] == '_':
@@ -65,10 +65,10 @@ class Config:
                 continue
             unknown_keys.append(k)
         if unknown_keys:
-            print('Unknown keys defined in configuration file: %s\n' %
-                  ', '.join(unknown_keys))
+            print(('Unknown keys defined in configuration file: %s\n' %
+                  ', '.join(unknown_keys)))
 
-        if 'input_path' not in config.keys() or 'search_paths' not in config.keys():
+        if 'input_path' not in list(config.keys()) or 'search_paths' not in list(config.keys()):
             raise errors.FatalError("config.rc does not have input_path or search_paths set, "
                                     "please edit the file.")
 

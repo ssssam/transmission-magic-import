@@ -28,7 +28,7 @@ def normalise_path(old_path):
 def transmission_find_torrent(tc_list, torrent):
     """See if a torrent is already present in Transmission. We match only by name, although
        it would be possible to check if the file list matches"""
-    for key, value in tc_list.iteritems():
-        if value.name == torrent.name:
-            return value
+    for item in tc_list:
+        if item.name == torrent.name:
+            return item
     return None

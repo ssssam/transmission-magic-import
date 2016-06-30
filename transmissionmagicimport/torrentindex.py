@@ -17,14 +17,15 @@
 # Transmission Magic Import.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import bcoding
+
 import glob
 import os
 import pickle
 import sys
-import urlparse
+import urllib.parse
 import warnings
 
-import transmissionmagicimport.bdecode as bdecode
 import transmissionmagicimport.config as config
 import transmissionmagicimport.errors as errors
 import transmissionmagicimport.utils as utils
@@ -48,10 +49,10 @@ def load_index():
     """Load pickled search results"""
 
     try:
-        results_file = open('transmission-magic-import.results', 'r')
+        results_file = open('transmission-magic-import.results', 'rb')
         index = pickle.load(results_file)
         results_file.close()
-        print "Read ./transmission-magic-import.results"
+        print("Read ./transmission-magic-import.results")
     except EOFError:
         raise errors.FatalError("Unable to read file transmission-magic-import.results.\n\n"
                                 "Please run 'transmission-magic-import search'.")
@@ -85,13 +86,35 @@ class Torrent:
                 return 0.0
 
         if length == 0:
-            print "Warning: %s has length 0" % path
+            print("Warning: %s has length 0" % path)
             return 2.0
 
         data_file_size = os.stat(path).st_size
         size_match = 1.0 - (float(abs(data_file_size - length)
                                   ) / float(max(data_file_size, length)))
         return size_match + 1.0
+
+    @staticmethod
+    def expand_data_file_path(host_path, data_file_path):
+        """Expand the path to one file of a torrent's payload."""
+        # It's not entirely clear whether the torrent format encodes
+        # paths in a specific way. We seem to receive both strings and
+        # bytes types, for different ones, so let's handle both cases
+        # and avoid making any assumptions about the encoding of the
+        # path within the torrent file.
+        #
+        # In the case that we receive an encoded path from the torrent,
+        # we assume the host filesystem encodes paths as UTF-8 in order
+        # to encode the host path. This is hopefully true but not guaranteed.
+        if isinstance(data_file_path[0], bytes):
+            result = os.path.join(
+                host_path.encode('utf-8'),
+                b'/'.join(data_file_path))
+        else:
+            result = os.path.join(
+                host_path,
+                '/'.join(data_file_path))
+        return result
 
     def add_data_path(self, config, path):
         # Calculate how much the data matches the torrent (looking at names and sizes only, we
@@ -105,8 +128,8 @@ class Torrent:
             assert (os.path.isdir(path))
             match_strength = 0.0
             for data_file_info in self.file_info['files']:
-                data_file_path = os.path.join(
-                    path, '/'.join(data_file_info['path']))
+                data_file_path = self.expand_data_file_path(
+                        path, data_file_info['path'])
                 match_strength += self.check_data_file(
                     data_file_path, data_file_info['length'])
             match_strength /= (2.0 * len(self.file_info['files']))
@@ -153,16 +176,15 @@ class TorrentIndex:
             self.duplicate_torrent_files = []
             self.excluded_torrent_files = []
 
-        print "Reading torrent files ..."
+        print("Reading torrent files ...")
 
         # Iterate through every .torrent file below 'config.input_path'
-        def walk_fn(arg, dirname, filenames):
+        for dirpath, dirnames, filenames in os.walk(config.input_path):
             for f in filenames:
                 if f.endswith('.torrent'):
-                    self.read_torrent(os.path.join(dirname, f))
-        os.path.walk(config.input_path, walk_fn, None)
+                    self.read_torrent(os.path.join(dirpath, f))
 
-        print ".. done, found %i torrents" % len(self.torrents),
+        print(".. done, found %i torrents" % len(self.torrents), end=' ')
 
         if len(self.torrents) == 0:
             sys.stderr.write("transmission-magic-import: no files found in path '%s'\n"
@@ -170,10 +192,10 @@ class TorrentIndex:
             sys.exit(1)
 
         if self.duplicates:
-            print "with %i duplicates" % self.duplicates,
+            print("with %i duplicates" % self.duplicates, end=' ')
         if self.excluded:
-            print "and %i excluded by tracker" % self.excluded,
-        print "\n"
+            print("and %i excluded by tracker" % self.excluded, end=' ')
+        print("\n")
 
         # Free piece data, we don't need it now the duplicates are gone, and it
         # takes up a fair amount of memory
@@ -181,11 +203,9 @@ class TorrentIndex:
             torrent.file_info['pieces'] = None
 
     def read_torrent(self, filename):
-        torrent_file = open(filename, 'r')
+        torrent_file = open(filename, 'rb')
 
-        # FIXME: This is a pretty slow operation; we don't need to decode all
-        # the data yet
-        torrent_data = bdecode.bdecode(torrent_file.read())
+        torrent_data = bcoding.bdecode(torrent_file.read())
 
         if 'announce' not in torrent_data:
             warnings.warn("No 'announce' URL found in %s; ignoring" % filename)
@@ -193,7 +213,7 @@ class TorrentIndex:
 
         # Get tracker hostname, see if this torrent should be ignored
         #
-        tracker_url = urlparse.urlparse(torrent_data['announce'])
+        tracker_url = urllib.parse.urlparse(torrent_data['announce'])
         tracker_hostname = tracker_url.hostname
 
         # Store tracker even if it's excluded; this list is only used for
@@ -245,7 +265,7 @@ class TorrentIndex:
             t.file_info = None
 
     def save(self):
-        results_file = open('transmission-magic-import.results', 'w')
+        results_file = open('transmission-magic-import.results', 'wb')
         pickle.dump(self.torrents, results_file)
         results_file.close()
-        print "\nWrote ./transmission-magic-import.results\n"
+        print("\nWrote ./transmission-magic-import.results\n")

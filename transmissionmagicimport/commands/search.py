@@ -40,7 +40,7 @@ class Search:
         """Search for torrent data by matching directory or file names with the torrent name."""
         if not os.access(path, os.R_OK):
             if os.path.split(path)[1] != 'lost+found':
-                print "Warning: cannot read %s" % path
+                print("Warning: cannot read %s" % path)
             return
 
         if path[len(path) - 1] == '/':
@@ -91,9 +91,9 @@ class cmd_search(commands.Command):
             # print "More than one location for %s: %s" % (torrent,
             # torrent.data_matches)
 
-        print "\nTorrents missing their data: "
+        print("\nTorrents missing their data: ")
         for torrent in unmatched_list:
-            print "\t%s" % os.path.basename(torrent.filename)
+            print("\t%s" % os.path.basename(torrent.filename))
 
         index.purge_stage1()
         index.save()
