@@ -17,15 +17,15 @@
 # Transmission Magic Import.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import os;
-import sys;
+import os
+import sys
 
-import transmissionmagicimport.commands as commands;
-import transmissionmagicimport.errors as errors;
-from transmissionmagicimport.config import Config;
+import transmissionmagicimport.commands as commands
+import transmissionmagicimport.errors as errors
+from transmissionmagicimport.config import Config
 
 help = \
-"""\ntransmission-magic-import: Organiser for stray .torrent files
+    """\ntransmission-magic-import: Organiser for stray .torrent files
 
 Instructions:
   1. create config.rc (see config.rc.example)
@@ -47,30 +47,33 @@ Other commands:
                   exists elsewhere.
 """
 
+
 def print_help():
-	print help
+    print help
+
 
 def main(args):
-	if not args:
-		print_help ()
-		sys.exit(1)
+    if not args:
+        print_help()
+        sys.exit(1)
 
-	command = args[0]
+    command = args[0]
 
-	try:
-		config = Config()
-	except errors.FatalError, exc:
-		sys.stderr.write("transmission-magic-import: %s\n" % exc.args[0])
-		sys.exit(1)
+    try:
+        config = Config()
+    except errors.FatalError, exc:
+        sys.stderr.write("transmission-magic-import: %s\n" % exc.args[0])
+        sys.exit(1)
 
-	try:
-		rc = commands.run (command, config, help = print_help)
-	except errors.FatalError, exc:
-		sys.stderr.write('\ntransmission-magic-import %s: %s\n' % (command, exc))
-		sys.exit(1)
-	except KeyboardInterrupt:
-		sys.stderr.write('Interrupted')
-		sys.exit(1)
+    try:
+        rc = commands.run(command, config, help=print_help)
+    except errors.FatalError, exc:
+        sys.stderr.write('\ntransmission-magic-import %s: %s\n' %
+                         (command, exc))
+        sys.exit(1)
+    except KeyboardInterrupt:
+        sys.stderr.write('Interrupted')
+        sys.exit(1)
 
-	if rc:
-		sys.exit(rc)
+    if rc:
+        sys.exit(rc)

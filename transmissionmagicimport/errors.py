@@ -17,11 +17,14 @@
 # Transmission Magic Import.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+
 class TMIException(Exception):
     pass
+
 
 class ConfigError(TMIException):
     '''A problem in a configuration file.'''
 
+
 class FatalError(TMIException):
-   '''Now we quit.'''
+    '''Now we quit.'''

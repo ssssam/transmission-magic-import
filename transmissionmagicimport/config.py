@@ -23,53 +23,55 @@ import types
 
 import transmissionmagicimport.errors as errors
 
-__all__ = [ 'Config' ]
+__all__ = ['Config']
 
-_keys = [ 'input_path', 'search_paths',
-          'exclude_trackers', 'avoid_data_paths',
-          'transmission_hostname', 'transmission_port']
+_keys = ['input_path', 'search_paths',
+         'exclude_trackers', 'avoid_data_paths',
+         'transmission_hostname', 'transmission_port']
+
 
 class Config:
-	def __init__(self, filename='./config.rc'):
-		self._config = {
-		     '__file__': filename #_defaults_file
-		}
 
-		self.filename = filename
+    def __init__(self, filename='./config.rc'):
+        self._config = {
+            '__file__': filename  # _defaults_file
+        }
 
-		if not os.path.exists(filename):
-			raise errors.FatalError('could not load config file, %s is missing' % filename)
+        self.filename = filename
 
-		self.load()
+        if not os.path.exists(filename):
+            raise errors.FatalError(
+                'could not load config file, %s is missing' % filename)
 
-	def load(self):
-		config = self._config
-		try:
-			execfile (self.filename, config)
-		except Exception, e:
-			if isinstance(e, errors.FatalError):
-				raise e
-			traceback.print_exc()
-			raise errors.FatalError('could not load config file')
+        self.load()
 
-		unknown_keys = []
-		for k in config.keys():
-			if k in _keys:
-				continue
-			if k[0] == '_':
-				continue
-			if type(config[k]) in (types.ModuleType, types.FunctionType, types.MethodType):
-				continue
-			unknown_keys.append(k)
-		if unknown_keys:
-			print ('Unknown keys defined in configuration file: %s\n' % \
-			       ', '.join(unknown_keys))
+    def load(self):
+        config = self._config
+        try:
+            execfile(self.filename, config)
+        except Exception, e:
+            if isinstance(e, errors.FatalError):
+                raise e
+            traceback.print_exc()
+            raise errors.FatalError('could not load config file')
 
-		if 'input_path' not in config.keys() or 'search_paths' not in config.keys():
-			raise errors.FatalError("config.rc does not have input_path or search_paths set, "
-			                        "please edit the file.")
+        unknown_keys = []
+        for k in config.keys():
+            if k in _keys:
+                continue
+            if k[0] == '_':
+                continue
+            if type(config[k]) in (types.ModuleType, types.FunctionType, types.MethodType):
+                continue
+            unknown_keys.append(k)
+        if unknown_keys:
+            print('Unknown keys defined in configuration file: %s\n' %
+                  ', '.join(unknown_keys))
 
-		# copy known config keys to attributes on the instance
-		for name in _keys:
-			setattr(self, name, config.get(name, []))
+        if 'input_path' not in config.keys() or 'search_paths' not in config.keys():
+            raise errors.FatalError("config.rc does not have input_path or search_paths set, "
+                                    "please edit the file.")
 
+        # copy known config keys to attributes on the instance
+        for name in _keys:
+            setattr(self, name, config.get(name, []))

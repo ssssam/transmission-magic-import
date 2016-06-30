@@ -19,63 +19,68 @@
 
 __metaclass__ = type
 __all__ = [
-	'Command',
-	'register_command',
-	'run'
+    'Command',
+    'register_command',
+    'run'
 ]
 
 import sys
 
 import transmissionmagicimport.errors as errors
 
+
 class Command:
-	"""Base class for Command objects"""
+    """Base class for Command objects"""
 
-	doc = ''
-	name = None
+    doc = ''
+    name = None
 
-	def execute(self, config, help = None):
-		return self.run(config, help = help)
+    def execute(self, config, help=None):
+        return self.run(config, help=help)
 
-	def run(self, config):
-		"""The body of the command"""
-		raise NotImplementedError
+    def run(self, config):
+        """The body of the command"""
+        raise NotImplementedError
 
 # handle registration of new commands
 _commands = {}
+
+
 def register_command(command_class):
     _commands[command_class.name] = command_class
 
 # special help command, never run
-class cmd_help(Command):
-	doc = 'Information about available commands'
-	name = 'help'
 
-	def run(self, config, help = None):
-		if help:
-			return help()
+
+class cmd_help(Command):
+    doc = 'Information about available commands'
+    name = 'help'
+
+    def run(self, config, help=None):
+        if help:
+            return help()
 
 register_command(cmd_help)
 
 
 def get_commands():
-	return _commands
+    return _commands
+
 
 def run(command, config, help=None):
-	# if the command hasn't been registered, load a module by the same name
-	if command not in _commands:
-		try:
-			__import__('transmissionmagicimport.commands.%s' % command)
-		except ImportError as e:
-			if e.message.endswith(command):
-				pass
-			else:
-				raise
-	if command not in _commands:
-		raise errors.FatalError('command not found')
+    # if the command hasn't been registered, load a module by the same name
+    if command not in _commands:
+        try:
+            __import__('transmissionmagicimport.commands.%s' % command)
+        except ImportError as e:
+            if e.message.endswith(command):
+                pass
+            else:
+                raise
+    if command not in _commands:
+        raise errors.FatalError('command not found')
 
-	command_class = _commands[command]
+    command_class = _commands[command]
 
-	cmd = command_class()
-	return cmd.execute(config, help = help)
-
+    cmd = command_class()
+    return cmd.execute(config, help=help)

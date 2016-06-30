@@ -5,12 +5,13 @@
 
 import re
 try:
-    import psyco # Optional, 2.5x improvement in speed
+    import psyco  # Optional, 2.5x improvement in speed
     psyco.full()
 except ImportError:
     pass
 
 decimal_match = re.compile('\d')
+
 
 def bdecode(data):
     '''Main function to decode bencoded data'''
@@ -19,10 +20,11 @@ def bdecode(data):
     root = _dechunk(chunks)
     return root
 
+
 def _dechunk(chunks):
     item = chunks.pop()
 
-    if item == 'd': 
+    if item == 'd':
         item = chunks.pop()
         hash = {}
         while item != 'e':
@@ -43,7 +45,7 @@ def _dechunk(chunks):
         item = chunks.pop()
         num = ''
         while item != 'e':
-            num  += item
+            num += item
             item = chunks.pop()
         return int(num)
     elif decimal_match.search(item):

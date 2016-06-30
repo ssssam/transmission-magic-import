@@ -28,50 +28,52 @@ import transmissionmagicimport.errors as errors
 from transmissionmagicimport.torrentindex import TorrentIndex, load_index;
 import transmissionmagicimport.utils as utils
 
+
 class cmd_import (commands.Command):
-	name = 'import'
+    name = 'import'
 
-	def run(self, config, help=None):
-		torrents = load_index()
+    def run(self, config, help=None):
+        torrents = load_index()
 
-		try:
-			tc = transmissionrpc.Client(config.transmission_hostname, port=config.transmission_port)
-		except transmissionrpc.error.TransmissionError, e:
-			raise errors.FatalError ("Unable to connect to a Transmission at %s:%i. %s.\n\n"
-			                         "Make sure Transmission is running, the web client is "
-			                         "enabled in the preferences and its details match the "
-			                         "settings in config.rc. Make sure transmission-daemon is "
-			                         "not running if you are trying to connect to a GUI instance."
-			                         % (config.transmission_hostname, config.transmission_port, e))
+        try:
+            tc = transmissionrpc.Client(
+                config.transmission_hostname, port=config.transmission_port)
+        except transmissionrpc.error.TransmissionError, e:
+            raise errors.FatalError("Unable to connect to a Transmission at %s:%i. %s.\n\n"
+                                     "Make sure Transmission is running, the web client is "
+                                     "enabled in the preferences and its details match the "
+                                     "settings in config.rc. Make sure transmission-daemon is "
+                                     "not running if you are trying to connect to a GUI instance."
+                                     % (config.transmission_hostname, config.transmission_port, e))
 
-		tc_existing_torrents = tc.list()
+        tc_existing_torrents = tc.list()
 
-		newly_queued = 0
-		already_present = 0
+        newly_queued = 0
+        already_present = 0
 
-		for torrent in torrents:
-			data_path = torrent.choose_data_path()
-			if data_path == None: continue
+        for torrent in torrents:
+            data_path = torrent.choose_data_path()
+            if data_path == None: continue
 
-			if utils.transmission_find_torrent (tc_existing_torrents, torrent) != None:
-				already_present += 1
-				continue
+            if utils.transmission_find_torrent(tc_existing_torrents, torrent) != None:
+                already_present += 1
+                continue
 
-			uri = 'file://' + urllib.pathname2url(torrent.filename)
-			try:
-				tc_list = tc.add_uri (uri, download_dir=data_path,
-				                      paused=True)
-			except transmissionrpc.error.TransmissionError as e:
-				raise transmissionrpc.error.TransmissionError(
-			for key, value in tc_list.iteritems():
-				tc_torrent_id = key
-				tc_torrent = value
-			tc.verify (tc_torrent_id)
+            uri = 'file://' + urllib.pathname2url(torrent.filename)
+            try:
+                tc_list = tc.add_uri(uri, download_dir=data_path,
+                                      paused=True)
+            except transmissionrpc.error.TransmissionError as e:
+                raise transmissionrpc.error.TransmissionError(
+            for key, value in tc_list.iteritems():
+                tc_torrent_id=key
+                tc_torrent=value
+            tc.verify(tc_torrent_id)
 
-			tc_existing_torrents.update(tc_list)
+            tc_existing_torrents.update(tc_list)
 
-			newly_queued += 1
+            newly_queued += 1
 
-		print "\nAdded to queue: %i (already present: %i)" % (newly_queued, already_present)
+        print "\nAdded to queue: %i (already present: %i)" % (newly_queued, already_present)
 
-commands.register_command (cmd_import)
+commands.register_command(cmd_import)

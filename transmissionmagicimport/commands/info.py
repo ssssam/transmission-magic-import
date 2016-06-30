@@ -17,25 +17,26 @@
 # Transmission Magic Import.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import os;
+import os
 
 import transmissionmagicimport.commands as commands
-from transmissionmagicimport.torrentindex import TorrentIndex;
+from transmissionmagicimport.torrentindex import TorrentIndex
+
 
 class cmd_info(commands.Command):
-	name = 'info'
+    name = 'info'
 
-	def run(self, config, help=None):
-		index = TorrentIndex (config)
+    def run(self, config, help=None):
+        index = TorrentIndex(config)
 
-		print "Multi-file torrents: %i, single-file torrents %i\n" % \
-		       (len(index.names_multi), len(index.names_single))
+        print "Multi-file torrents: %i, single-file torrents %i\n" % \
+            (len(index.names_multi), len(index.names_single))
 
-		print "Trackers: %i" % len(index.trackers)
-		for hostname in index.trackers:
-			print "\t%s" % hostname,
-			if hostname in config.exclude_trackers:
-				print " (excluded)",
-			print
+        print "Trackers: %i" % len(index.trackers)
+        for hostname in index.trackers:
+            print "\t%s" % hostname,
+            if hostname in config.exclude_trackers:
+                print " (excluded)",
+            print
 
-commands.register_command (cmd_info)
+commands.register_command(cmd_info)

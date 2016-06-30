@@ -17,16 +17,18 @@
 # Transmission Magic Import.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-def normalise_path (old_path):
-	"""Common escapes done on bittorrent paths"""
-	new_path = str(old_path)
-	new_path = new_path.replace('?', '_')
-	return new_path
 
-def transmission_find_torrent (tc_list, torrent):
-	"""See if a torrent is already present in Transmission. We match only by name, although
-	   it would be possible to check if the file list matches"""
-	for key, value in tc_list.iteritems():
-		if value.name == torrent.name:
-			return value
-	return None
+def normalise_path(old_path):
+    """Common escapes done on bittorrent paths"""
+    new_path = str(old_path)
+    new_path = new_path.replace('?', '_')
+    return new_path
+
+
+def transmission_find_torrent(tc_list, torrent):
+    """See if a torrent is already present in Transmission. We match only by name, although
+       it would be possible to check if the file list matches"""
+    for key, value in tc_list.iteritems():
+        if value.name == torrent.name:
+            return value
+    return None
