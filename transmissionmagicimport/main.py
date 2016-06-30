@@ -20,9 +20,9 @@
 import os;
 import sys;
 
-import commands;
-import errors;
-from config import Config;
+import transmissionmagicimport.commands as commands;
+import transmissionmagicimport.errors as errors;
+from transmissionmagicimport.config import Config;
 
 help = \
 """\ntransmission-magic-import: Organiser for stray .torrent files

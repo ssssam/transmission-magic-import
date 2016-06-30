@@ -26,7 +26,7 @@ __all__ = [
 
 import sys
 
-import errors
+import transmissionmagicimport.errors as errors
 
 class Command:
 	"""Base class for Command objects"""
@@ -65,12 +65,12 @@ def run(command, config, help=None):
 	# if the command hasn't been registered, load a module by the same name
 	if command not in _commands:
 		try:
-			__import__('commands.%s' % command)
+			__import__('transmissionmagicimport.commands.%s' % command)
 		except ImportError as e:
 			if e.message.endswith(command):
 				pass
 			else:
-				raise e
+				raise
 	if command not in _commands:
 		raise errors.FatalError('command not found')
 

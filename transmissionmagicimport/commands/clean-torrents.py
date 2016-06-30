@@ -19,8 +19,8 @@
 
 import os;
 
-import commands
-from torrentindex import TorrentIndex;
+import transmissionmagicimport.commands as commands
+from transmissionmagicimport.torrentindex import TorrentIndex;
 
 class cmd_clean_torrents(commands.Command):
 	name = 'clean-torrents'

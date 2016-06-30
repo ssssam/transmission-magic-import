@@ -21,7 +21,7 @@ import os
 import traceback
 import types
 
-import errors
+import transmissionmagicimport.errors as errors
 
 __all__ = [ 'Config' ]
 

@@ -23,10 +23,10 @@ import glob;
 import os;
 import urllib;
 
-import commands
-import errors
-from torrentindex import TorrentIndex, load_index;
-import utils
+import transmissionmagicimport.commands as commands
+import transmissionmagicimport.errors as errors
+from transmissionmagicimport.torrentindex import TorrentIndex, load_index;
+import transmissionmagicimport.utils as utils
 
 class cmd_import (commands.Command):
 	name = 'import'

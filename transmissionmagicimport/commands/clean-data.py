@@ -22,10 +22,10 @@ import transmissionrpc;
 import glob;
 import os;
 
-import commands
-import errors
-from torrentindex import TorrentIndex, load_index;
-import utils
+import transmissionmagicimport.commands
+import transmissionmagicimport.errors
+from transmissionmagicimport.torrentindex import TorrentIndex, load_index;
+import transmissionmagicimport.utils
 
 class cmd_clean_data (commands.Command):
 	name = 'clean-data'

@@ -23,10 +23,10 @@ import pickle
 import sys
 import urlparse
 
-import bdecode
-import config
-import errors
-import utils
+import transmissionmagicimport.bdecode as bdecode
+import transmissionmagicimport.config as config
+import transmissionmagicimport.errors as errors
+import transmissionmagicimport.utils as utils
 
 def torrent_info_matches (info_1, info_2):
 	"""Returns True if two torrents reflect the same data."""

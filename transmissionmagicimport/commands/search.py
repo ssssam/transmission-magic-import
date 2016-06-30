@@ -19,9 +19,9 @@
 
 import os;
 
-import commands
-import config
-from torrentindex import TorrentIndex;
+import transmissionmagicimport.commands as commands
+import transmissionmagicimport.config as config
+from transmissionmagicimport.torrentindex import TorrentIndex;
 
 class Search:
 	def __init__ (self, config, index):
