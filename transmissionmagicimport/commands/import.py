@@ -59,12 +59,12 @@ class cmd_import (commands.Command):
                 already_present += 1
                 continue
 
-            uri = 'file://' + urllib.pathname2url(torrent.filename)
             try:
-                tc_list = tc.add_uri(uri, download_dir=data_path,
-                                      paused=True)
+                tc_list = tc.add_torrent(
+                        torrent.filename, download_dir=data_path, paused=True)
             except transmissionrpc.error.TransmissionError as e:
-                raise transmissionrpc.error.TransmissionError(
+                raise
+
             for key, value in tc_list.iteritems():
                 tc_torrent_id=key
                 tc_torrent=value
