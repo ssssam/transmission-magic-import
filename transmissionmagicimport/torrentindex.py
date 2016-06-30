@@ -22,6 +22,7 @@ import os
 import pickle
 import sys
 import urlparse
+import warnings
 
 import transmissionmagicimport.bdecode as bdecode
 import transmissionmagicimport.config as config
@@ -185,6 +186,10 @@ class TorrentIndex:
         # FIXME: This is a pretty slow operation; we don't need to decode all
         # the data yet
         torrent_data = bdecode.bdecode(torrent_file.read())
+
+        if 'announce' not in torrent_data:
+            warnings.warn("No 'announce' URL found in %s; ignoring" % filename)
+            return
 
         # Get tracker hostname, see if this torrent should be ignored
         #
