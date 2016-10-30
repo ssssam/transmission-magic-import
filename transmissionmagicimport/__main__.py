@@ -77,3 +77,6 @@ def main(args):
 
     if rc:
         sys.exit(rc)
+
+
+main(sys.argv[1:])
